@@ -150,7 +150,7 @@
   </div>
 </section>
 
-<!-- COLECÇÕES / PORTFOLIO -->
+<!-- COLECÇÕES -->
 <section id="portfolio">
   <div class="collections-header reveal">
     <p class="section-label">Portfólio</p>
@@ -216,7 +216,7 @@
   </div>
 </section>
 
-<!-- A VISÃO / SOBRE -->
+<!-- A VISÃO -->
 <section id="visao">
   <div class="about-grid">
     <div class="about-visual reveal">
@@ -309,7 +309,7 @@
   </div>
 </section>
 
-<!-- GALERIA PRIVADA / COFRE -->
+<!-- GALERIA PRIVADA -->
 <section id="cofre">
   <div class="vault-inner">
     <div class="vault-icon">
@@ -357,33 +357,6 @@
   </div>
 </footer>
 
-<!-- ÁREA DE GESTÃO (BACKOFFICE) -->
-<button class="admin-toggle" id="adminToggle" title="Área de Gestão" aria-label="Área de Gestão">
-  <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
-    <circle cx="8" cy="8" r="3" stroke="#b0a898" stroke-width="1"/>
-    <path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.22 3.22l1.41 1.41M11.37 11.37l1.41 1.41M3.22 12.78l1.41-1.41M11.37 4.63l1.41-1.41" stroke="#b0a898" stroke-width="1" stroke-linecap="round"/>
-  </svg>
-</button>
-<div class="admin-panel" id="adminPanel">
-  <h4>Gestão — Galerias Privadas</h4>
-  <div class="admin-gallery-item">
-    <span class="admin-gallery-name">Ana &amp; Tomás</span>
-    <span class="admin-gallery-code">AMOR24</span>
-  </div>
-  <div class="admin-gallery-item">
-    <span class="admin-gallery-name">Sofia R.</span>
-    <span class="admin-gallery-code">ESS25A</span>
-  </div>
-  <div class="admin-gallery-item">
-    <span class="admin-gallery-name">Família Gomes</span>
-    <span class="admin-gallery-code">LUM25B</span>
-  </div>
-  <div class="admin-gallery-item" style="padding-top:1rem;border-top:1px solid rgba(176,168,152,0.1);margin-top:0.5rem">
-    <span style="font-family:var(--sans);font-size:0.6rem;font-weight:200;letter-spacing:0.2em;color:var(--stone)">Adicionar galeria</span>
-    <span class="admin-gallery-code" onclick="addGallery()" style="cursor:none">+ Nova</span>
-  </div>
-</div>
-
 <script>
   // ── CURSOR ──
   const cursor = document.getElementById('cursor');
@@ -391,14 +364,11 @@
   let mx = 0, my = 0, rx = 0, ry = 0;
   document.addEventListener('mousemove', e => {
     mx = e.clientX; my = e.clientY;
-    cursor.style.left = mx + 'px';
-    cursor.style.top  = my + 'px';
+    cursor.style.left = mx + 'px'; cursor.style.top = my + 'px';
   });
   function animateRing() {
-    rx += (mx - rx) * 0.12;
-    ry += (my - ry) * 0.12;
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
+    rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+    ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
     requestAnimationFrame(animateRing);
   }
   animateRing();
@@ -426,7 +396,7 @@
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
   reveals.forEach(el => io.observe(el));
 
-  // ── DADOS DAS GALERIAS ──
+  // ── GALERIAS (apenas leitura — gestão em admin.html) ──
   const galleries = {
     lamour:  { title: "L'Amour — Casamentos", count: 18 },
     essence: { title: "Essence — Retratos",   count: 12 },
@@ -448,53 +418,35 @@
     const data    = galleries[key];
     const overlay = document.getElementById('galleryOverlay');
     const grid    = document.getElementById('galleryGrid');
-    const title   = document.getElementById('galleryTitle');
-    title.textContent = data.title;
+    document.getElementById('galleryTitle').textContent = data.title;
     grid.innerHTML = '';
     const favs = new Set();
-
     for (let i = 0; i < data.count; i++) {
-      const ph = document.createElement('div');
+      const ph    = document.createElement('div');
       ph.className = 'gallery-photo';
-
-      const bg = document.createElement('div');
+      const bg    = document.createElement('div');
       bg.className = 'gallery-photo-bg';
       bg.style.background = gradients[i % gradients.length];
-
       const grain = document.createElement('div');
       grain.style.cssText = 'position:absolute;inset:0;opacity:0.35;background-image:url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\' opacity=\'1\'/%3E%3C/svg%3E");mix-blend-mode:multiply;pointer-events:none';
-
       const inner = document.createElement('div');
       inner.style.cssText = 'position:absolute;inset:0;transition:transform 0.6s cubic-bezier(0.16,1,0.3,1)';
-      inner.appendChild(bg);
-      inner.appendChild(grain);
-
+      inner.appendChild(bg); inner.appendChild(grain);
       const fav = document.createElement('button');
       fav.className = 'gallery-fav';
       fav.innerHTML = '<svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="3" stroke="#b0a898" stroke-width="1"/></svg>';
       fav.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (favs.has(i)) {
-          favs.delete(i);
-          fav.classList.remove('active');
-          fav.querySelector('circle').setAttribute('fill', 'none');
-        } else {
-          favs.add(i);
-          fav.classList.add('active');
-          fav.querySelector('circle').setAttribute('fill', '#2a2825');
-        }
+        if (favs.has(i)) { favs.delete(i); fav.classList.remove('active'); fav.querySelector('circle').setAttribute('fill','none'); }
+        else { favs.add(i); fav.classList.add('active'); fav.querySelector('circle').setAttribute('fill','#2a2825'); }
       });
-
-      ph.appendChild(inner);
-      ph.appendChild(fav);
+      ph.appendChild(inner); ph.appendChild(fav);
       grid.appendChild(ph);
     }
-
     overlay.style.display = 'flex';
     requestAnimationFrame(() => overlay.classList.add('visible'));
-
     document.getElementById('downloadBtn').onclick = () => {
-      alert(`${favs.size} foto(s) seleccionada(s) para transferência.\n(Funcionalidade completa disponível em produção)`);
+      alert(`${favs.size} foto(s) seleccionada(s) para transferência.`);
     };
   }
 
@@ -505,12 +457,7 @@
   });
 
   // ── GALERIA PRIVADA ──
-  const vaultCodes = {
-    'AMOR24': 'lamour',
-    'ESS25A': 'essence',
-    'LUM25B': 'lumiere',
-    'MELOSA': 'lamour'
-  };
+  const vaultCodes = { 'AMOR24':'lamour', 'ESS25A':'essence', 'LUM25B':'lumiere', 'MELOSA':'lamour' };
   function checkVaultCode() {
     const code = document.getElementById('vaultCode').value.trim().toUpperCase();
     const err  = document.getElementById('vaultError');
@@ -528,33 +475,9 @@
     if (e.key === 'Enter') checkVaultCode();
   });
 
-  // ── ÁREA DE GESTÃO ──
-  document.getElementById('adminToggle').addEventListener('click', () => {
-    document.getElementById('adminPanel').classList.toggle('open');
-  });
-  document.addEventListener('click', e => {
-    const panel  = document.getElementById('adminPanel');
-    const toggle = document.getElementById('adminToggle');
-    if (!panel.contains(e.target) && !toggle.contains(e.target)) {
-      panel.classList.remove('open');
-    }
-  });
-  function addGallery() {
-    const name = prompt('Nome da galeria:');
-    const code = prompt('Código de acesso:');
-    if (name && code) {
-      const panel = document.getElementById('adminPanel');
-      const item  = document.createElement('div');
-      item.className = 'admin-gallery-item';
-      item.innerHTML = `<span class="admin-gallery-name">${name}</span><span class="admin-gallery-code">${code.toUpperCase()}</span>`;
-      panel.insertBefore(item, panel.lastElementChild);
-    }
-  }
-
-  // ── EFEITO DE NAVEGAÇÃO ──
+  // ── NAVEGAÇÃO ──
   window.addEventListener('scroll', () => {
-    const nav = document.getElementById('mainNav');
-    nav.style.mixBlendMode = window.scrollY > 80 ? 'normal' : 'multiply';
+    document.getElementById('mainNav').style.mixBlendMode = window.scrollY > 80 ? 'normal' : 'multiply';
   });
 </script>
 </body>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Melosa — Área de Gestão</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bone: #f5f2ec;
+    --sand: #e8e0d0;
+    --stone: #b0a898;
+    --charcoal: #2a2825;
+    --deep: #0e0d0c;
+    --serif: 'Cormorant Garamond', Georgia, serif;
+    --sans: 'Jost', sans-serif;
+    --ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --red: #c0392b;
+    --green: #5a8a6a;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-size: 16px; }
+  body {
+    background: var(--deep);
+    color: var(--bone);
+    font-family: var(--sans);
+    font-weight: 300;
+    min-height: 100vh;
+  }
+
+  /* ── ECRÃ DE LOGIN ── */
+  #loginScreen {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+    position: relative; overflow: hidden;
+  }
+  .login-deco {
+    position: absolute; border-radius: 50%;
+    border: 1px solid rgba(176,168,152,0.06);
+    pointer-events: none;
+  }
+  .login-deco:nth-child(1) { width: 60vw; height: 60vw; top: -20%; right: -15%; }
+  .login-deco:nth-child(2) { width: 30vw; height: 30vw; bottom: 5%; left: -10%; }
+  .login-box {
+    width: 100%; max-width: 400px;
+    position: relative; z-index: 1;
+    animation: fadeUp 1s var(--ease) 0.2s both;
+  }
+  .login-logo {
+    font-family: var(--serif); font-style: italic;
+    font-size: 2rem; font-weight: 300; color: var(--bone);
+    text-align: center; display: block;
+    text-decoration: none; margin-bottom: 0.5rem;
+  }
+  .login-subtitle {
+    font-family: var(--sans); font-size: 0.58rem; font-weight: 200;
+    letter-spacing: 0.45em; text-transform: uppercase;
+    color: var(--stone); text-align: center; margin-bottom: 3.5rem;
+  }
+  .login-field { margin-bottom: 2rem; }
+  .login-field label {
+    display: block; font-size: 0.58rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--stone); margin-bottom: 0.75rem;
+  }
+  .login-field input {
+    width: 100%; background: transparent;
+    border: none; border-bottom: 1px solid rgba(176,168,152,0.25);
+    padding: 0.75rem 0; font-family: var(--serif); font-size: 1rem;
+    font-weight: 300; color: var(--bone); outline: none;
+    transition: border-color 0.3s; letter-spacing: 0.05em;
+  }
+  .login-field input:focus { border-bottom-color: var(--stone); }
+  .login-btn {
+    width: 100%; background: none;
+    border: 1px solid rgba(176,168,152,0.3);
+    padding: 1.1rem; color: var(--stone);
+    font-family: var(--sans); font-size: 0.62rem; font-weight: 200;
+    letter-spacing: 0.4em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.4s var(--ease); margin-top: 0.5rem;
+  }
+  .login-btn:hover { border-color: var(--stone); color: var(--bone); }
+  .login-error {
+    font-size: 0.62rem; letter-spacing: 0.15em; color: rgba(192,57,43,0.8);
+    text-align: center; margin-top: 1.25rem; min-height: 1rem;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .login-error.show { opacity: 1; }
+  .login-back {
+    display: block; text-align: center; margin-top: 2.5rem;
+    font-size: 0.58rem; letter-spacing: 0.3em; text-transform: uppercase;
+    color: rgba(176,168,152,0.4); text-decoration: none;
+    transition: color 0.3s;
+  }
+  .login-back:hover { color: var(--stone); }
+
+  /* ── PAINEL DE ADMINISTRAÇÃO ── */
+  #adminPanel {
+    display: none; min-height: 100vh; flex-direction: column;
+    animation: fadeIn 0.6s var(--ease) both;
+  }
+  #adminPanel.visible { display: flex; }
+
+  /* Cabeçalho do painel */
+  .admin-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.5rem 3vw;
+    border-bottom: 1px solid rgba(176,168,152,0.1);
+    position: sticky; top: 0; background: var(--deep); z-index: 10;
+  }
+  .admin-header-left { display: flex; align-items: center; gap: 1.5rem; }
+  .admin-brand {
+    font-family: var(--serif); font-style: italic; font-size: 1.2rem;
+    font-weight: 300; color: var(--bone); text-decoration: none;
+  }
+  .admin-badge {
+    font-family: var(--sans); font-size: 0.55rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--stone); border: 1px solid rgba(176,168,152,0.25);
+    padding: 0.25rem 0.6rem;
+  }
+  .admin-header-right { display: flex; align-items: center; gap: 1.5rem; }
+  .admin-visit-btn {
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--stone); text-decoration: none; transition: color 0.3s;
+  }
+  .admin-visit-btn:hover { color: var(--bone); }
+  .admin-logout {
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    background: none; border: 1px solid rgba(176,168,152,0.2);
+    padding: 0.5rem 1rem; color: var(--stone);
+    cursor: pointer; transition: all 0.3s;
+  }
+  .admin-logout:hover { color: var(--bone); border-color: var(--stone); }
+
+  /* Conteúdo principal */
+  .admin-main { flex: 1; padding: 3rem 3vw; max-width: 1100px; }
+
+  .admin-section { margin-bottom: 4rem; }
+  .admin-section-header {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-bottom: 2rem; padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(176,168,152,0.1);
+  }
+  .admin-section-title {
+    font-family: var(--serif); font-size: 1.8rem; font-weight: 300;
+    font-style: italic; color: var(--bone);
+  }
+  .admin-section-count {
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.3em; text-transform: uppercase; color: var(--stone);
+  }
+
+  /* Tabela de galerias */
+  .galleries-table { width: 100%; border-collapse: collapse; }
+  .galleries-table th {
+    font-family: var(--sans); font-size: 0.55rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase; color: var(--stone);
+    text-align: left; padding: 0 1rem 0.75rem;
+    border-bottom: 1px solid rgba(176,168,152,0.1);
+  }
+  .galleries-table th:last-child { text-align: right; }
+  .gallery-row {
+    border-bottom: 1px solid rgba(176,168,152,0.06);
+    transition: background 0.2s;
+  }
+  .gallery-row:hover { background: rgba(176,168,152,0.04); }
+  .gallery-row td { padding: 1.25rem 1rem; vertical-align: middle; }
+  .gallery-row-name {
+    font-family: var(--serif); font-style: italic; font-size: 1.05rem;
+    font-weight: 300; color: var(--bone);
+  }
+  .gallery-row-client {
+    font-family: var(--sans); font-size: 0.7rem; font-weight: 200;
+    letter-spacing: 0.05em; color: var(--stone);
+  }
+  .gallery-row-code {
+    font-family: var(--sans); font-size: 0.75rem; font-weight: 300;
+    letter-spacing: 0.25em; color: var(--bone);
+    background: rgba(176,168,152,0.08);
+    padding: 0.35rem 0.75rem; display: inline-block;
+  }
+  .gallery-row-date {
+    font-family: var(--sans); font-size: 0.65rem; font-weight: 200;
+    letter-spacing: 0.05em; color: var(--stone);
+  }
+  .gallery-row-status {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.2em; text-transform: uppercase;
+  }
+  .gallery-row-status::before {
+    content: ''; width: 5px; height: 5px; border-radius: 50%;
+  }
+  .gallery-row-status.active { color: var(--green); }
+  .gallery-row-status.active::before { background: var(--green); }
+  .gallery-row-status.inactive { color: var(--stone); }
+  .gallery-row-status.inactive::before { background: var(--stone); }
+  .gallery-row-actions {
+    display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center;
+  }
+  .btn-action {
+    background: none; border: 1px solid rgba(176,168,152,0.2);
+    padding: 0.4rem 0.8rem; cursor: pointer;
+    font-family: var(--sans); font-size: 0.58rem; font-weight: 200;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    transition: all 0.3s;
+  }
+  .btn-action.edit { color: var(--stone); }
+  .btn-action.edit:hover { color: var(--bone); border-color: var(--stone); }
+  .btn-action.delete { color: rgba(192,57,43,0.6); border-color: rgba(192,57,43,0.2); }
+  .btn-action.delete:hover { color: var(--red); border-color: var(--red); }
+  .btn-action.toggle { color: var(--stone); }
+  .btn-action.toggle:hover { color: var(--bone); border-color: var(--stone); }
+
+  /* Botão adicionar galeria */
+  .btn-add-gallery {
+    display: inline-flex; align-items: center; gap: 1rem;
+    background: none; border: 1px solid rgba(176,168,152,0.25);
+    padding: 0.85rem 1.75rem; cursor: pointer; color: var(--stone);
+    font-family: var(--sans); font-size: 0.62rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    transition: all 0.4s var(--ease);
+  }
+  .btn-add-gallery:hover { color: var(--bone); border-color: var(--stone); }
+
+  /* Modal de nova galeria */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(14,13,12,0.85); backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: #1a1917; width: 100%; max-width: 480px;
+    padding: 2.5rem;
+    transform: translateY(20px) scale(0.98);
+    transition: transform 0.4s var(--ease);
+    border: 1px solid rgba(176,168,152,0.1);
+  }
+  .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+  .modal-title {
+    font-family: var(--serif); font-style: italic; font-size: 1.5rem;
+    font-weight: 300; color: var(--bone); margin-bottom: 2rem;
+  }
+  .modal-field { margin-bottom: 1.75rem; }
+  .modal-field label {
+    display: block; font-size: 0.58rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase;
+    color: var(--stone); margin-bottom: 0.6rem;
+  }
+  .modal-field input, .modal-field select {
+    width: 100%; background: transparent;
+    border: none; border-bottom: 1px solid rgba(176,168,152,0.2);
+    padding: 0.7rem 0; font-family: var(--serif); font-size: 0.95rem;
+    font-weight: 300; color: var(--bone); outline: none;
+    transition: border-color 0.3s;
+  }
+  .modal-field input:focus,
+  .modal-field select:focus { border-bottom-color: var(--stone); }
+  .modal-field select option { background: #1a1917; }
+  .modal-hint {
+    font-size: 0.6rem; letter-spacing: 0.1em; color: var(--stone);
+    margin-top: 0.4rem; opacity: 0.7;
+  }
+  .modal-actions { display: flex; gap: 1rem; margin-top: 2rem; justify-content: flex-end; }
+  .modal-cancel {
+    background: none; border: none; cursor: pointer;
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--stone); padding: 0.75rem 1.25rem; transition: color 0.3s;
+  }
+  .modal-cancel:hover { color: var(--bone); }
+  .modal-confirm {
+    background: none; border: 1px solid rgba(176,168,152,0.3);
+    padding: 0.75rem 1.75rem; cursor: pointer; color: var(--stone);
+    font-family: var(--sans); font-size: 0.6rem; font-weight: 200;
+    letter-spacing: 0.35em; text-transform: uppercase; transition: all 0.3s;
+  }
+  .modal-confirm:hover { color: var(--bone); border-color: var(--stone); }
+
+  /* Toast de confirmação */
+  .toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(42,40,37,0.95); border: 1px solid rgba(176,168,152,0.2);
+    padding: 0.85rem 1.75rem; z-index: 300;
+    font-family: var(--sans); font-size: 0.62rem; font-weight: 200;
+    letter-spacing: 0.2em; text-transform: uppercase; color: var(--stone);
+    opacity: 0; transition: all 0.4s var(--ease); white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Estatísticas rápidas */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;
+    margin-bottom: 4rem;
+  }
+  .stat-card {
+    padding: 1.75rem;
+    border: 1px solid rgba(176,168,152,0.1);
+    transition: border-color 0.3s;
+  }
+  .stat-card:hover { border-color: rgba(176,168,152,0.25); }
+  .stat-label {
+    font-family: var(--sans); font-size: 0.55rem; font-weight: 200;
+    letter-spacing: 0.4em; text-transform: uppercase; color: var(--stone);
+    margin-bottom: 0.75rem;
+  }
+  .stat-value {
+    font-family: var(--serif); font-size: 2.5rem; font-weight: 300;
+    color: var(--bone); line-height: 1;
+  }
+  .stat-value em { font-style: italic; color: var(--stone); font-size: 1rem; }
+
+  /* Rodapé do admin */
+  .admin-footer {
+    padding: 1.5rem 3vw;
+    border-top: 1px solid rgba(176,168,152,0.08);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .admin-footer p {
+    font-size: 0.58rem; letter-spacing: 0.2em; color: rgba(176,168,152,0.3);
+    font-weight: 200;
+  }
+
+  /* Animações */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  /* Responsivo */
+  @media (max-width: 640px) {
+    .stats-grid { grid-template-columns: 1fr; }
+    .galleries-table th:nth-child(3),
+    .galleries-table td:nth-child(3),
+    .galleries-table th:nth-child(4),
+    .galleries-table td:nth-child(4) { display: none; }
+    .admin-header-right .admin-visit-btn { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ECRÃ DE LOGIN -->
+<div id="loginScreen">
+  <div class="login-deco"></div>
+  <div class="login-deco"></div>
+  <div class="login-box">
+    <a href="index.html" class="login-logo">Melosa</a>
+    <p class="login-subtitle">Área de Gestão Restrita</p>
+    <div class="login-field">
+      <label>Utilizador</label>
+      <input type="text" id="loginUser" placeholder="administrador" autocomplete="username">
+    </div>
+    <div class="login-field">
+      <label>Palavra-passe</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Entrar na área de gestão</button>
+    <p class="login-error" id="loginError">Credenciais incorrectas. Tente novamente.</p>
+    <a href="index.html" class="login-back">← Voltar ao site</a>
+  </div>
+</div>
+
+<!-- PAINEL DE ADMINISTRAÇÃO -->
+<div id="adminPanel">
+
+  <!-- Cabeçalho -->
+  <header class="admin-header">
+    <div class="admin-header-left">
+      <a href="index.html" class="admin-brand">Melosa</a>
+      <span class="admin-badge">Administração</span>
+    </div>
+    <div class="admin-header-right">
+      <a href="index.html" class="admin-visit-btn">↗ Ver site público</a>
+      <button class="admin-logout" onclick="doLogout()">Sair</button>
+    </div>
+  </header>
+
+  <!-- Conteúdo -->
+  <main class="admin-main">
+
+    <!-- Estatísticas -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-label">Galerias activas</p>
+        <p class="stat-value" id="statActive">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total de galerias</p>
+        <p class="stat-value" id="statTotal">0</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Última actualização</p>
+        <p class="stat-value" style="font-size:1.2rem;line-height:1.3" id="statDate">—</p>
+      </div>
+    </div>
+
+    <!-- Gestão de galerias -->
+    <div class="admin-section">
+      <div class="admin-section-header">
+        <h2 class="admin-section-title">Galerias Privadas</h2>
+        <span class="admin-section-count" id="galleriesCount">0 galerias</span>
+      </div>
+
+      <table class="galleries-table">
+        <thead>
+          <tr>
+            <th>Nome da galeria</th>
+            <th>Código de acesso</th>
+            <th>Colecção</th>
+            <th>Estado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="galleriesBody"></tbody>
+      </table>
+
+      <br><br>
+      <button class="btn-add-gallery" onclick="openModal()">
+        + Adicionar nova galeria
+      </button>
+    </div>
+
+  </main>
+
+  <footer class="admin-footer">
+    <p>Melosa Fotografia &amp; Vídeo · Área de Gestão</p>
+    <p id="sessionInfo"></p>
+  </footer>
+
+</div>
+
+<!-- MODAL: Nova / Editar galeria -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 class="modal-title" id="modalTitle">Nova Galeria</h3>
+    <div class="modal-field">
+      <label>Nome do cliente / galeria</label>
+      <input type="text" id="mName" placeholder="Ex: Ana &amp; Tomás">
+    </div>
+    <div class="modal-field">
+      <label>Código de acesso</label>
+      <input type="text" id="mCode" placeholder="Ex: AMOR24" style="text-transform:uppercase" oninput="this.value=this.value.toUpperCase()">
+      <p class="modal-hint">6 caracteres, sem espaços. Partilhe apenas com o cliente.</p>
+    </div>
+    <div class="modal-field">
+      <label>Colecção associada</label>
+      <select id="mCollection">
+        <option value="lamour">L'Amour — Casamentos</option>
+        <option value="essence">Essence — Retratos</option>
+        <option value="lumiere">Lumière — Família</option>
+        <option value="frame">Frame — Vídeo</option>
+      </select>
+    </div>
+    <div class="modal-field">
+      <label>Data do evento</label>
+      <input type="text" id="mDate" placeholder="Ex: Junho 2026">
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="modal-confirm" onclick="saveGallery()">Guardar galeria</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── CREDENCIAIS (num projecto real, validar no servidor) ──
+  const ADMIN_USER = 'melosa';
+  const ADMIN_PASS = 'melosa2026';
+
+  // ── ESTADO DA APLICAÇÃO ──
+  let galleries = JSON.parse(localStorage.getItem('melosa_galleries') || 'null') || [
+    { id: 1, name: 'Ana & Tomás',    code: 'AMOR24', collection: 'lamour',  date: 'Março 2024',   active: true  },
+    { id: 2, name: 'Sofia R.',       code: 'ESS25A', collection: 'essence', date: 'Janeiro 2025', active: true  },
+    { id: 3, name: 'Família Gomes',  code: 'LUM25B', collection: 'lumiere', date: 'Abril 2025',   active: true  },
+    { id: 4, name: 'Carla & Miguel', code: 'AMR26C', collection: 'lamour',  date: 'Fevereiro 2026', active: false },
+  ];
+  let editingId   = null;
+  let nextId      = Math.max(...galleries.map(g => g.id)) + 1;
+
+  const collectionNames = {
+    lamour:  "L'Amour",
+    essence: 'Essence',
+    lumiere: 'Lumière',
+    frame:   'Frame',
+  };
+
+  function saveToStorage() {
+    localStorage.setItem('melosa_galleries', JSON.stringify(galleries));
+  }
+
+  // ── LOGIN / LOGOUT ──
+  function doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    const err  = document.getElementById('loginError');
+
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      sessionStorage.setItem('melosa_admin', '1');
+      sessionStorage.setItem('melosa_login_time', new Date().toLocaleTimeString('pt-PT'));
+      showPanel();
+    } else {
+      err.classList.add('show');
+      document.getElementById('loginPass').value = '';
+      setTimeout(() => err.classList.remove('show'), 3000);
+    }
+  }
+
+  document.getElementById('loginPass').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginUser').addEventListener('keydown', e => {
+    if (e.key === 'Enter') document.getElementById('loginPass').focus();
+  });
+
+  function doLogout() {
+    sessionStorage.removeItem('melosa_admin');
+    document.getElementById('adminPanel').classList.remove('visible');
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginPass').value = '';
+    document.getElementById('loginUser').value = '';
+  }
+
+  function showPanel() {
+    document.getElementById('loginScreen').style.display = 'none';
+    const panel = document.getElementById('adminPanel');
+    panel.classList.add('visible');
+    renderGalleries();
+    const t = sessionStorage.getItem('melosa_login_time') || '';
+    document.getElementById('sessionInfo').textContent = `Sessão iniciada às ${t}`;
+  }
+
+  // Auto-login se sessão activa
+  if (sessionStorage.getItem('melosa_admin') === '1') showPanel();
+
+  // ── RENDER DAS GALERIAS ──
+  function renderGalleries() {
+    const tbody  = document.getElementById('galleriesBody');
+    const active = galleries.filter(g => g.active).length;
+    tbody.innerHTML = '';
+    galleries.forEach(g => {
+      const tr = document.createElement('tr');
+      tr.className = 'gallery-row';
+      tr.innerHTML = `
+        <td>
+          <div class="gallery-row-name">${g.name}</div>
+        </td>
+        <td><span class="gallery-row-code">${g.code}</span></td>
+        <td><span class="gallery-row-client">${collectionNames[g.collection] || g.collection}</span></td>
+        <td>
+          <span class="gallery-row-status ${g.active ? 'active' : 'inactive'}">
+            ${g.active ? 'Activa' : 'Inactiva'}
+          </span>
+        </td>
+        <td>
+          <div class="gallery-row-actions">
+            <button class="btn-action toggle" onclick="toggleGallery(${g.id})">${g.active ? 'Desactivar' : 'Activar'}</button>
+            <button class="btn-action edit"   onclick="editGallery(${g.id})">Editar</button>
+            <button class="btn-action delete" onclick="deleteGallery(${g.id})">Remover</button>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+    document.getElementById('galleriesCount').textContent = `${galleries.length} galeria${galleries.length !== 1 ? 's' : ''}`;
+    document.getElementById('statActive').textContent = active;
+    document.getElementById('statTotal').textContent  = galleries.length;
+    document.getElementById('statDate').textContent   = new Date().toLocaleDateString('pt-PT', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // ── ACÇÕES ──
+  function toggleGallery(id) {
+    const g = galleries.find(x => x.id === id);
+    if (!g) return;
+    g.active = !g.active;
+    saveToStorage();
+    renderGalleries();
+    showToast(g.active ? `"${g.name}" activada.` : `"${g.name}" desactivada.`);
+  }
+
+  function deleteGallery(id) {
+    const g = galleries.find(x => x.id === id);
+    if (!g) return;
+    if (!confirm(`Remover a galeria "${g.name}"?\nO código "${g.code}" deixará de funcionar.`)) return;
+    galleries = galleries.filter(x => x.id !== id);
+    saveToStorage();
+    renderGalleries();
+    showToast(`Galeria "${g.name}" removida.`);
+  }
+
+  function editGallery(id) {
+    const g = galleries.find(x => x.id === id);
+    if (!g) return;
+    editingId = id;
+    document.getElementById('modalTitle').textContent       = 'Editar Galeria';
+    document.getElementById('mName').value                  = g.name;
+    document.getElementById('mCode').value                  = g.code;
+    document.getElementById('mCollection').value            = g.collection;
+    document.getElementById('mDate').value                  = g.date;
+    openModal();
+  }
+
+  function saveGallery() {
+    const name       = document.getElementById('mName').value.trim();
+    const code       = document.getElementById('mCode').value.trim().toUpperCase();
+    const collection = document.getElementById('mCollection').value;
+    const date       = document.getElementById('mDate').value.trim();
+
+    if (!name || !code) { showToast('Preencha o nome e o código.'); return; }
+    if (code.length < 4) { showToast('O código deve ter pelo menos 4 caracteres.'); return; }
+
+    // Verificar código duplicado (excluindo o próprio ao editar)
+    const duplicate = galleries.find(g => g.code === code && g.id !== editingId);
+    if (duplicate) { showToast(`O código "${code}" já está em uso.`); return; }
+
+    if (editingId) {
+      const g = galleries.find(x => x.id === editingId);
+      Object.assign(g, { name, code, collection, date });
+      showToast(`Galeria "${name}" actualizada.`);
+    } else {
+      galleries.push({ id: nextId++, name, code, collection, date, active: true });
+      showToast(`Galeria "${name}" criada com código ${code}.`);
+    }
+
+    saveToStorage();
+    renderGalleries();
+    closeModal();
+  }
+
+  // ── MODAL ──
+  function openModal() {
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+    // Limpar campos se era nova galeria
+    if (!editingId) {
+      document.getElementById('mName').value  = '';
+      document.getElementById('mCode').value  = '';
+      document.getElementById('mDate').value  = '';
+      document.getElementById('mCollection').value = 'lamour';
+    }
+    editingId = null;
+    document.getElementById('modalTitle').textContent = 'Nova Galeria';
+  }
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+    if (e.key === 'Enter' && document.getElementById('modalOverlay').classList.contains('open')) saveGallery();
+  });
+
+  // ── TOAST ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+</script>
+</body>
+</html>
